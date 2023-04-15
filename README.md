@@ -5,6 +5,7 @@
 
 ## Usage ##
 - Ensure python is isntalled
+- Install python art module `pip install art` or `pip3 install art`
 - In whatever directory you place the file, from your terminal, run the commmand `python3 bj-term.py`
 - Depending on your configuration, alternatively you can try running it as `python bj-term.py`
 - That's it!
