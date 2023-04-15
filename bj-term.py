@@ -42,7 +42,7 @@ def display_hands(player_hand, dealer_hand, hidden=True):
 def get_bet(balance):
     while True:
         try:
-            bet = int(input(f"Enter your bet (1-{balance}): "))
+            bet = int(input(f"\nEnter your bet (1-{balance}): "))
             if bet > 0 and bet <= balance:
                 return bet
             else:
@@ -76,20 +76,49 @@ def determine_winner(player_hand, dealer_hand, bet, balance):
     dealer_score = calculate_score(dealer_hand)
 
     if player_score > 21:
-        display_result("You bust!", -bet, balance - bet)
+        display_result("\nYou bust!", -bet, balance - bet)
         return balance - bet
     elif dealer_score > 21:
-        display_result("Dealer busts! You win!", bet, balance + bet)
+        display_result("\nDealer busts! You win!", bet, balance + bet)
         return balance + bet
     elif player_score > dealer_score:
-        display_result("You win!", bet, balance + bet)
+        display_result("\nYou win!", bet, balance + bet)
         return balance + bet
     elif player_score < dealer_score:
-        display_result("You lose!", -bet, balance - bet)
+        display_result("\nYou lose!", -bet, balance - bet)
         return balance - bet
     else:
-        display_result("It's a tie!", 0, balance)
+        display_result("\nIt's a tie!", 0, balance)
         return balance
+
+def print_cards(cardlist):
+    for card in zip(*cardlist):
+            print('   '.join(card))
+
+def reg_card_visual(card):
+    suits = "Spades Diamonds Hearts Clubs".split()
+    suit_symbols = ['♠','♦','♥','♣']
+    suit_pairs = dict(zip(suits, suit_symbols))
+
+    v = card['value']
+    s = suit_pairs[card['suit']]
+
+    visual = [
+
+        '  ╔════════════╗',
+       f'  ║ {v:<5}      ║',
+        '  ║            ║',
+        '  ║            ║',
+       f'  ║     {s:^3}    ║',
+        '  ║            ║',
+        '  ║            ║',
+        '  ║            ║',
+       f'  ║      {v:>5} ║',
+        '  ╚════════════╝'
+    ]
+
+    return visual
+
 
 def main():
     print("Welcome to the Blackjack game!")
@@ -97,32 +126,35 @@ def main():
     print(f"Your starting balance is: ${balance}")
 
     while balance > 0:
-        print(art("random"))
         player_hand = [deal_card(), deal_card()]
         dealer_hand = [deal_card(), deal_card()]
-        
+
+        print_cards([reg_card_visual(c) for c in player_hand])
+#        print_cards([reg_card_visual(c) for c in dealer_hand])
+
         display_hands(player_hand, dealer_hand)
         bet = get_bet(balance)
 
         if not player_turn(player_hand, dealer_hand):
             balance = determine_winner(player_hand, dealer_hand, bet, balance)
             if balance > 0:
-                print("Play again!")
+                print("\nPlay again!")
             continue
         
         if not dealer_turn(dealer_hand):
             display_hands(player_hand, dealer_hand, hidden=False)
             balance = determine_winner(player_hand, dealer_hand, bet, balance)
             if balance > 0:
-                print("Play again!")
+                print("\nPlay again!")
             continue
         
         display_hands(player_hand, dealer_hand, hidden=False)
         balance = determine_winner(player_hand, dealer_hand, bet, balance)
         if balance > 0:
-            print("Play again!")
+            print("\nPlay again!")
     
     print("You're out of money. Game over!")
+
 
 if __name__ == "__main__":
     main()
