@@ -12,4 +12,4 @@
 
 ### Example Screenshot ###
 
-<img width="600" alt="image" src="https://user-images.githubusercontent.com/2326739/232206378-036c5e7f-2e55-4ae1-9459-a4a8294df33a.png">
+<img width="600" alt="image" src="https://user-images.githubusercontent.com/2326739/232208815-88d72181-d3c9-48b5-b37f-8b92b59790be.png">
