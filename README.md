@@ -1,5 +1,6 @@
 # bj-term
  Python Blackjack in the Terminal
+ 
  A "collaborative experiment" using GPT4 as my development partner.
 
 ## Usage ##
