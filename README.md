@@ -1,15 +1,34 @@
-# bj-term
- Python Blackjack in the Terminal
- 
- A "collaborative experiment" using GPT4 as my development partner.
+# Python Blackjack Game
 
-## Usage ##
-- Ensure python is isntalled
-- Install python art module `pip install art` or `pip3 install art`
-- In whatever directory you place the file, from your terminal, run the commmand `python3 bj-term.py`
-- Depending on your configuration, alternatively you can try running it as `python bj-term.py`
-- That's it!
+This is a simple command-line implementation of the classic Blackjack game, written in Python 3. To run the game, follow the instructions below:
 
-### Example Screenshot ###
+## Installation
 
-<img width="600" alt="image" src="https://user-images.githubusercontent.com/2326739/232208815-88d72181-d3c9-48b5-b37f-8b92b59790be.png">
+- Clone or download the repository to your local machine
+- Install pygame library by running `pip install pygame`
+
+## Usage
+
+- Open a terminal or command prompt and navigate to the directory where you cloned or downloaded the repository
+- Run the following command to start the game: `python blackjack.py`
+- Follow the on-screen instructions to play the game
+
+## Game Rules
+
+The game follows the standard rules of Blackjack:
+
+- The player's goal is to get closer to 21 points than the dealer without going over 21
+- Numbered cards are worth their face value, face cards (Jacks, Queens, and Kings) are worth 10, and Aces are worth 1 or 11
+- The player starts with two cards and can choose to "hit" to receive additional cards or "stand" to keep their current hand
+- The dealer also starts with two cards, but only one card is visible to the player until the end of the game
+- If the player's hand exceeds 21 points, they "bust" and lose the game
+- If the dealer's hand exceeds 21 points, they "bust" and the player wins the game
+- If neither player busts, the one with the highest hand value below 22 wins the game
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+This project was inspired by the Blackjack game in the book "Python for Everybody" by Charles Severance.
