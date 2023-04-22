@@ -13,6 +13,10 @@ This is a simple command-line implementation of the classic Blackjack game, writ
 - Run the following command to start the game: `python blackjack.py`
 - Follow the on-screen instructions to play the game
 
+## Example Screenshot ##
+<img src="https://user-images.githubusercontent.com/2326739/232260821-4d5d10e0-6ab2-4fce-ac3a-41fc07db7284.png" alt="image" width="400"/>
+
+
 ## Game Rules
 
 The game follows the standard rules of Blackjack:
