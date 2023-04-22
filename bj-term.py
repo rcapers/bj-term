@@ -1,8 +1,10 @@
+# Import necessary modules
 import os
 import sys
 import random
 from art import *
 
+# Suppress pygame welcome message
 old_stdout = sys.stdout
 sys.stdout = open(os.devnull, 'w')
 
@@ -11,18 +13,22 @@ from pygame import mixer
 
 sys.stdout = old_stdout
 
+# Initialize pygame and mixer
 pygame.init()
 mixer.init()
 
+# Function to play a sound file
 def play_sound(file):
     mixer.Sound(file).play()
 
+# Function to randomly deal a card
 def deal_card():
     suits = ["Spades", "Diamonds", "Hearts", "Clubs"]
     values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
     card = {"suit": random.choice(suits), "value": random.choice(values)}
     return card
 
+# Function to calculate the score of a hand
 def calculate_score(hand):
     total = 0
     aces = 0
@@ -42,6 +48,7 @@ def calculate_score(hand):
 
     return total
 
+# Function to ask user if they want to play again
 def play_again():
     while True:
         choice = input("Do you want to play again? (y/n): ").lower()
@@ -52,10 +59,13 @@ def play_again():
         else:
             print("Invalid input, please try again.")
 
+# This function displays the hands of both the player and the dealer
 def display_hands(player_hand, dealer_hand, hidden=True):
+    # Prints the player's hand and its total score
     print("\nPlayer's hand (Total: {}):".format(calculate_score(player_hand)))
     print_cards([reg_card_visual(c) for c in player_hand])
     
+    # Prints the dealer's hand and its total score
     print("\nDealer's hand:", end=" ")
     if hidden:
         print("(Total: Hidden)")
@@ -65,10 +75,13 @@ def display_hands(player_hand, dealer_hand, hidden=True):
         print("(Total: {})".format(calculate_score(dealer_hand)))
         print_cards([reg_card_visual(c) for c in dealer_hand])
 
+# This function gets the bet from the player
 def get_bet(balance):
     while True:
         try:
+            # Prompts the user to enter their bet
             bet = int(input(f"Enter your bet (1-{balance}): "))
+            # Checks if the bet is valid
             if bet > 0 and bet <= balance:
                 return bet
             else:
@@ -76,28 +89,35 @@ def get_bet(balance):
         except ValueError:
             print("Invalid input, please enter a number.")
 
+# This function handles the player's turn
 def player_turn(player_hand, dealer_hand):
     while True:
+        # Prompts the user to hit or stand
         choice = input("\nDo you want to (h)it or (s)tand? ").lower()
         if choice == "h":
+            # Deals a card to the player
             player_hand.append(deal_card())
             play_sound("sounds/deal.wav")
             display_hands(player_hand, dealer_hand)
+            # Checks if the player has gone over 21
             if calculate_score(player_hand) > 21:
                 return False
         elif choice == "s":
             return True
         else:
             print("Invalid input, please try again.")
-
+            
+# Dealer's turn to draw cards until score is 17 or higher
 def dealer_turn(dealer_hand):
     while calculate_score(dealer_hand) < 17:
         dealer_hand.append(deal_card())
     return calculate_score(dealer_hand) <= 21
 
 def display_result(message, balance_change, balance):
+    # Prints out the result of the game
     print(f"{message} Your balance changed by {balance_change}. New balance: {balance}")
 
+# Determines the winner of the game based on scores
 def determine_winner(player_hand, dealer_hand, bet, balance):
     player_score = calculate_score(player_hand)
     dealer_score = calculate_score(dealer_hand)
@@ -122,10 +142,12 @@ def determine_winner(player_hand, dealer_hand, bet, balance):
         display_result("It's a tie!", 0, balance)
         return balance
 
+# Prints out the cards in a visual format
 def print_cards(cardlist):
     for card in zip(*cardlist):
         print(' '.join(card))
 
+# Creates a visual representation of the card
 def reg_card_visual(card):
     suits = "Spades Diamonds Hearts Clubs".split()
     suit_symbols = ['♠','♦','♥','♣']
@@ -147,6 +169,7 @@ def reg_card_visual(card):
 
     return visual
 
+# Main function that runs the game
 def main():
     print("Welcome to the Blackjack game!")
     balance = 100
@@ -157,8 +180,6 @@ def main():
         dealer_hand = [deal_card(), deal_card()]
 
         play_sound("sounds/deal.wav")
-        pygame.time.delay(300)  # Add delay to play the sound before displaying hands
-        
         display_hands(player_hand, dealer_hand)
         bet = get_bet(balance)
 
@@ -181,5 +202,6 @@ def main():
     else:
         print("You're out of money. Thanks for playing!")
 
+ # Runs the main() function
 if __name__ == "__main__":
     main()
