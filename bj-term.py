@@ -3,7 +3,16 @@ import os
 import sys
 import random
 from art import *
+import argparse
 
+parser = argparse.ArgumentParser(description='-- BlackJack Help Menu -----------------------')
+parser.add_argument('-help', action='store_true', help='list all command line arguments')
+# add other arguments here
+args = parser.parse_args()
+
+if args.help:
+    parser.print_help()
+    
 # Suppress pygame welcome message
 old_stdout = sys.stdout
 sys.stdout = open(os.devnull, 'w')
@@ -19,7 +28,8 @@ mixer.init()
 
 # Function to play a sound file
 def play_sound(file):
-    mixer.Sound(file).play()
+    if not args.no_sound:
+        mixer.Sound(file).play()
 
 # Function to randomly deal a card
 def deal_card():
@@ -58,7 +68,6 @@ def play_again():
             return False
         else:
             print("Invalid input, please try again.")
-
 # This function displays the hands of both the player and the dealer
 def display_hands(player_hand, dealer_hand, hidden=True):
     # Prints the player's hand and its total score
@@ -106,7 +115,6 @@ def player_turn(player_hand, dealer_hand):
             return True
         else:
             print("Invalid input, please try again.")
-            
 # Dealer's turn to draw cards until score is 17 or higher
 def dealer_turn(dealer_hand):
     while calculate_score(dealer_hand) < 17:
@@ -168,9 +176,12 @@ def reg_card_visual(card):
     ]
 
     return visual
-
 # Main function that runs the game
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--no-sound', action='store_true', help='Disable sound effects')
+    global args
+    args = parser.parse_args()
     print("Welcome to the Blackjack game!")
     balance = 100
     print(f"Your starting balance is: ${balance}")
@@ -179,9 +190,10 @@ def main():
         player_hand = [deal_card(), deal_card()]
         dealer_hand = [deal_card(), deal_card()]
 
+        bet = get_bet(balance)
+
         play_sound("sounds/deal.wav")
         display_hands(player_hand, dealer_hand)
-        bet = get_bet(balance)
 
         if not player_turn(player_hand, dealer_hand):
             balance = determine_winner(player_hand, dealer_hand, bet, balance)
