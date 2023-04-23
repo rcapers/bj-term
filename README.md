@@ -1,4 +1,5 @@
-# Python Blackjack Game
+# Terminal Blackjack
+Developed by Ryan Capers, as a way to learn Python (just because)
 
 This is a simple command-line implementation of the classic Blackjack game, written in Python 3. To run the game, follow the instructions below:
 
@@ -10,10 +11,14 @@ This is a simple command-line implementation of the classic Blackjack game, writ
 ## Usage
 
 - Open a terminal or command prompt and navigate to the directory where you cloned or downloaded the repository
-- Run the following command to start the game: `python blackjack.py`
+- Run the following command to start the game: `python blackjack.py` 
+- For a list of available options, use command `python blackjack.py --help`
 - Follow the on-screen instructions to play the game
 
-## Example Screenshot ##
+## Latest Functionality and Features
+- Added support for flag parameters in bj-term.py to customize the game experience
+
+## Example Screenshot (may be outdated) ##
 <img src="https://user-images.githubusercontent.com/2326739/232260821-4d5d10e0-6ab2-4fce-ac3a-41fc07db7284.png" alt="image" width="400"/>
 
 
@@ -32,7 +37,3 @@ The game follows the standard rules of Blackjack:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-This project was inspired by the Blackjack game in the book "Python for Everybody" by Charles Severance.
