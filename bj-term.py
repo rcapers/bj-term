@@ -148,6 +148,7 @@ def determine_winner(player_hand, dealer_hand, bet, balance):
         return balance
     else:
         display_result("It's a tie!", 0, balance)
+        play_sound("sounds/tie.wav")
         return balance
 
 # Prints out the cards in a visual format
@@ -163,16 +164,13 @@ def reg_card_visual(card):
     v = card['value']
     s = suit_pairs[card['suit']]
     visual = [
-        '  ╔════════════╗',
-        f'  ║ {v:<5}      ║',
-        '  ║            ║',
-        '  ║            ║',
-        f'  ║     {s:^3}    ║',
-        '  ║            ║',
-        '  ║            ║',
-        '  ║            ║',
-        f'  ║      {v:>5} ║',
-        '  ╚════════════╝'
+        '  ╔═══════╗',
+        f'  ║ {v:<5} ║',
+        '  ║       ║',
+        f'  ║{s:^7}║',
+        '  ║       ║',
+        f'  ║ {v:>5} ║',
+        '  ╚═══════╝'
     ]
 
     return visual
