@@ -19,7 +19,9 @@ This is a simple command-line implementation of the classic Blackjack game, writ
 - Added support for flag parameters in bj-term.py to customize the game experience
 
 ## Example Screenshot ##
-<img src="https://user-images.githubusercontent.com/2326739/232260821-4d5d10e0-6ab2-4fce-ac3a-41fc07db7284.png" alt="image" width="400"/>
+
+
+<img src="https://github.com/rcapers/bj-term/assets/2326739/3caff494-f743-480e-98ee-2fe403fd2522.png" width="500">
 
 
 ## Game Rules
