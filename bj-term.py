@@ -22,6 +22,16 @@ from pygame import mixer
 
 sys.stdout = old_stdout
 
+# Clear the terminal or console screen
+def clear_screen():
+    if os.name == 'nt':  # for windows
+        _ = os.system('cls')
+    else:  # for mac and linux(here, os.name is 'posix')
+        _ = os.system('clear')
+
+# Clear Screen
+clear_screen()
+
 # Initialize pygame and mixer
 pygame.init()
 mixer.init()
@@ -180,7 +190,15 @@ def main():
     parser.add_argument('--no-sound', action='store_true', help='Disable sound effects')
     global args
     args = parser.parse_args()
-    print("Welcome to the Blackjack game!")
+    print("""
+  ____  _            _     _            _    
+ | __ )| | __ _  ___| | __(_) __ _  ___| | __
+ |  _ \| |/ _` |/ __| |/ /| |/ _` |/ __| |/ /
+ | |_) | | (_| | (__|   < | | (_| | (__|   < 
+ |____/|_|\__,_|\___|_|\_\/ |\__,_|\___|_|\_\\
+                        |__/                 
+""")
+
     balance = 100
     print(f"Your starting balance is: ${balance}")
     
@@ -205,6 +223,7 @@ def main():
 
         if balance > 0:
             if play_again():
+                clear_screen()
                 print("Starting a new game...")
             else:
                 print("Thanks for playing!")
