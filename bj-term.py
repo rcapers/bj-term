@@ -244,22 +244,21 @@ def display_game_options():
     print(options)
 
 def display_next_move_options():
-    options = f"""{Fore.CYAN}
-    NEXT MOVE
-
-    1. Continue playing
-    2. Save and quit
-    3. View detailed statistics
-
-    {Style.RESET_ALL}"""
-    print(options)
+    print(f"\n    {Fore.CYAN}What would you like to do next?{Style.RESET_ALL}")
+    print("    1. Continue playing")
+    print("    2. Save and quit")
+    print("    3. View statistics")
+    print("    4. Reset balance to $100")
 
 def display_game_over():
     message = f"""{Fore.RED}
     You're out of money!
-    Thanks for playing!
-    {Style.RESET_ALL}"""
+    {Style.RESET_ALL}
+    {Fore.GREEN}Balance reset to $100{Style.RESET_ALL}
+    """
     print(message)
+    input("    Press Enter to continue...")
+    return 100
 
 def display_bet_prompt(balance):
     print(f"\n    {Fore.CYAN}Current Balance: ${balance}{Style.RESET_ALL}")
@@ -447,7 +446,7 @@ def main():
     print(f"    {Fore.CYAN}Welcome to Blackjack!{Style.RESET_ALL}")
     print("    Type ? for help and commands")
 
-    while balance > 0:
+    while True:  # Changed to infinite loop since we'll always reset
         # Get bet
         bet = display_bet_prompt(balance)
         if not bet:
@@ -486,21 +485,27 @@ def main():
             display_hands(player_hand, dealer_hand, hidden=False)
             balance = determine_winner(player_hand, dealer_hand, bet, balance)
 
-        if balance > 0:
-            display_next_move_options()
-            choice = input("    Choose an option (1-3): ")
-            if choice == "2":
-                save_game(balance, stats)
-                print(f"    {Fore.GREEN}Thanks for playing!{Style.RESET_ALL}")
-                break
-            elif choice == "3":
-                stats.display(current_balance=balance)
-                input("\n    Press Enter to continue...")
+        if balance <= 0:
+            balance = display_game_over()
             clear_screen()
             display_title()
+            continue
 
-    if balance <= 0:
-        display_game_over()
+        display_next_move_options()
+        choice = input("    Choose an option (1-4): ")
+        if choice == "2":
+            save_game(balance, stats)
+            print(f"    {Fore.GREEN}Thanks for playing!{Style.RESET_ALL}")
+            break
+        elif choice == "3":
+            stats.display(current_balance=balance)
+            input("\n    Press Enter to continue...")
+        elif choice == "4":
+            balance = 100
+            print(f"    {Fore.GREEN}Balance reset to $100{Style.RESET_ALL}")
+            input("    Press Enter to continue...")
+        clear_screen()
+        display_title()
 
  # Runs the main() function
 if __name__ == "__main__":
