@@ -19,9 +19,15 @@ git clone https://github.com/rcapers/bj-term.git
 cd bj-term
 ```
 
-2. Install required packages:
+2. Set up a virtual environment (recommended):
 ```bash
-pip install pygame colorama art
+python3 -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+```
+
+3. Install required packages:
+```bash
+pip install -r requirements.txt
 ```
 
 ## Usage
