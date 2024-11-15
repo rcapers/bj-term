@@ -38,16 +38,21 @@ class Stats:
             self.current_streak = 0
         self.best_streak = max(self.best_streak, abs(self.current_streak))
         
-    def display(self):
-        print(f"\n{Fore.CYAN}=== Statistics ==={Style.RESET_ALL}")
-        print(f"Games Played: {self.games_played}")
-        print(f"Wins: {Fore.GREEN}{self.wins}{Style.RESET_ALL}")
-        print(f"Losses: {Fore.RED}{self.losses}{Style.RESET_ALL}")
-        print(f"Pushes: {self.pushes}")
-        print(f"Biggest Win: ${Fore.GREEN}{self.biggest_win}{Style.RESET_ALL}")
-        print(f"Biggest Loss: ${Fore.RED}{self.biggest_loss}{Style.RESET_ALL}")
-        print(f"Current Streak: {self.current_streak}")
-        print(f"Best Streak: {self.best_streak}")
+    def display(self, current_balance=None):
+        stats_display = f"""{Fore.CYAN}
+    STATISTICS
+
+    Games Played:   {self.games_played}
+    Wins:           {Fore.GREEN}{self.wins}{Style.RESET_ALL}
+    Losses:         {Fore.RED}{self.losses}{Style.RESET_ALL}
+    Pushes:         {self.pushes}
+    Biggest Win:    ${Fore.GREEN}{self.biggest_win}{Style.RESET_ALL}
+    Biggest Loss:   ${Fore.RED}{self.biggest_loss}{Style.RESET_ALL}
+    Current Streak: {self.current_streak}
+    Best Streak:    {self.best_streak}
+    Current Balance: ${current_balance}
+    {Style.RESET_ALL}"""
+        print(stats_display)
 
 class Deck:
     def __init__(self):
@@ -72,7 +77,7 @@ def save_game(balance, stats):
     }
     with open("blackjack_save.json", "w") as f:
         json.dump(save_data, f)
-    print(f"{Fore.GREEN}Game saved successfully!{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}    Game saved successfully!{Style.RESET_ALL}")
 
 def load_game():
     try:
@@ -145,43 +150,42 @@ def calculate_score(hand):
 # Function to ask user if they want to play again
 def play_again():
     while True:
-        choice = input("Do you want to play again? (y/n): ").lower()
+        choice = input("    Do you want to play again? (y/n): ").lower()
         if choice == 'y':
             return True
         elif choice == 'n':
             return False
         else:
-            print("Invalid input, please try again.")
+            print("    Invalid input, please try again.")
 
 # This function displays the hands of both the player and the dealer
 def display_hands(player_hand, dealer_hand, hidden=True):
+    clear_screen()
+    print(Back.BLACK, end='')  # Ensure black background persists
+    display_title()
+    
     score = calculate_score(player_hand)
     color = Fore.GREEN if score <= 21 else Fore.RED
     
-    # Create decorative separator
-    separator = f"{Back.BLACK}{Fore.CYAN}═══════════════════════════{Style.RESET_ALL}"
-    
     # Display dealer's hand
-    print(f"\n{separator}")
-    dealer_header = f"{Back.BLACK}{Fore.CYAN}♠ ♥ DEALER'S HAND ♦ ♣{Style.RESET_ALL}"
+    dealer_header = f"    {Fore.CYAN}♠ ♥ DEALER'S HAND ♦ ♣{Style.RESET_ALL}"
     print(dealer_header)
     
     if hidden:
-        print(f"{Back.BLACK}Total: {Fore.YELLOW}Hidden{Style.RESET_ALL}")
-        print_cards([reg_card_visual(c) for c in dealer_hand[:1]] + [hidden_card()])
+        print(f"    {Fore.YELLOW}Hidden{Style.RESET_ALL}")
+        print_cards([reg_card_visual(c) for c in dealer_hand[:1]] + [hidden_card()], padding="    ")
     else:
         dealer_score = calculate_score(dealer_hand)
         color_dealer = Fore.GREEN if dealer_score <= 21 else Fore.RED
-        print(f"{Back.BLACK}Total: {color_dealer}{dealer_score}{Style.RESET_ALL}")
-        print_cards([reg_card_visual(c) for c in dealer_hand])
+        print(f"    {color_dealer}{dealer_score}{Style.RESET_ALL}")
+        print_cards([reg_card_visual(c) for c in dealer_hand], padding="    ")
     
     # Display player's hand
-    print(f"\n{separator}")
-    player_header = f"{Back.BLACK}{Fore.CYAN}♠ ♥ PLAYER'S HAND ♦ ♣{Style.RESET_ALL}"
+    print(f"\n")
+    player_header = f"    {Fore.CYAN}♠ ♥ PLAYER'S HAND ♦ ♣{Style.RESET_ALL}"
     print(player_header)
-    print(f"{Back.BLACK}Total: {color}{score}{Style.RESET_ALL}")
-    print_cards([reg_card_visual(c) for c in player_hand])
-    print(separator)
+    print(f"    {color}{score}{Style.RESET_ALL}")
+    print_cards([reg_card_visual(c) for c in player_hand], padding="    ")
 
 def hidden_card():
     card = [
@@ -197,77 +201,82 @@ def hidden_card():
 
 def display_title():
     title = f"""
-{Back.BLACK}{Fore.YELLOW}
-     {Fore.GREEN}♠ ♥{Style.RESET_ALL}{Back.BLACK}{Fore.YELLOW}  WELCOME TO BLACKJACK  {Fore.RED}♦ ♣{Style.RESET_ALL}
-{Back.BLACK}{Fore.YELLOW}═══════════════════════════════════════════{Style.RESET_ALL}
-"""
+{Back.BLACK}
+    {Fore.BLUE}██████╗ ██╗      █████╗  ██████╗██╗  ██╗     ██╗ █████╗  ██████╗██╗  ██╗{Style.RESET_ALL}
+    {Fore.BLUE}██╔══██╗██║     ██╔══██╗██╔════╝██║ ██╔╝     ██║██╔══██╗██╔════╝██║ ██╔╝{Style.RESET_ALL}
+    {Fore.CYAN}██████╔╝██║     ███████║██║     █████╔╝      ██║███████║██║     █████╔╝{Style.RESET_ALL}
+    {Fore.CYAN}██╔══██╗██║     ██╔══██║██║     ██╔═██╗ ██   ██║██╔══██║██║     ██╔═██╗{Style.RESET_ALL}
+    {Fore.WHITE}██████╔╝███████╗██║  ██║╚██████╗██║  ██╗╚█████╔╝██║  ██║╚██████╗██║  ██╗{Style.RESET_ALL}
+    {Fore.WHITE}╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝ ╚════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝{Style.RESET_ALL}
+
+             {Fore.BLUE}♠{Fore.WHITE} Press ENTER to start  {Fore.CYAN}♥{Fore.WHITE} 'h' for help  {Fore.WHITE}♦{Fore.WHITE} 'q' to quit {Fore.BLUE}♣{Style.RESET_ALL}
+
+{Style.RESET_ALL}"""
     print(title)
 
-def display_stats(stats):
-    stats_display = f"""{Back.BLACK}{Fore.CYAN}
-════════════ STATISTICS ════════════
+def display_stats(stats, current_balance=None):
+    stats_display = f"""{Fore.CYAN}
+    STATISTICS
 
-Games Played: {stats.games_played}
-Wins:         {Fore.GREEN}{stats.wins}{Back.BLACK}{Fore.CYAN}
-Losses:       {Fore.RED}{stats.losses}{Back.BLACK}{Fore.CYAN}
-Pushes:       {stats.pushes}
-Biggest Win:  ${Fore.GREEN}{stats.biggest_win}{Back.BLACK}{Fore.CYAN}
-Biggest Loss: ${Fore.RED}{stats.biggest_loss}{Back.BLACK}{Fore.CYAN}
-Current Streak: {stats.current_streak}
-Best Streak:    {stats.best_streak}
-{Fore.CYAN}═══════════════════════════════════{Style.RESET_ALL}"""
+    Games Played:   {stats.games_played}
+    Wins:           {Fore.GREEN}{stats.wins}{Style.RESET_ALL}
+    Losses:         {Fore.RED}{stats.losses}{Style.RESET_ALL}
+    Pushes:         {stats.pushes}
+    Biggest Win:    ${Fore.GREEN}{stats.biggest_win}{Style.RESET_ALL}
+    Biggest Loss:   ${Fore.RED}{stats.biggest_loss}{Style.RESET_ALL}
+    Current Streak: {stats.current_streak}
+    Best Streak:    {stats.best_streak}
+    Current Balance: ${current_balance}
+    {Style.RESET_ALL}"""
     print(stats_display)
 
 def display_game_options():
-    options = f"""{Back.BLACK}{Fore.YELLOW}
-════════════ OPTIONS ════════════
+    options = f"""{Fore.CYAN}
+    OPTIONS
 
-(H) Hit     - Draw another card
-(S) Stand   - Keep current hand
-(D) Double  - Double bet & draw
-(Q) Quit    - Save and exit
-(?) Help    - Show game rules
+    (H) Hit     - Draw another card
+    (S) Stand   - Keep current hand
+    (D) Double  - Double bet & draw
+    (Q) Quit    - Save and exit
+    (?) Help    - Show this menu
 
-═══════════════════════════════{Style.RESET_ALL}"""
+    {Style.RESET_ALL}"""
     print(options)
 
 def display_next_move_options():
-    options = f"""{Back.BLACK}{Fore.YELLOW}
-════════════ NEXT MOVE ════════════
+    options = f"""{Fore.CYAN}
+    NEXT MOVE
 
-1. Continue playing
-2. Save and quit
-3. View detailed statistics
+    1. Continue playing
+    2. Save and quit
+    3. View detailed statistics
 
-═══════════════════════════════════{Style.RESET_ALL}"""
+    {Style.RESET_ALL}"""
     print(options)
 
 def display_game_over():
-    message = f"""{Back.BLACK}{Fore.RED}
-════════════════════════════
-   You're out of money!
-   Thanks for playing!
-════════════════════════════{Style.RESET_ALL}"""
+    message = f"""{Fore.RED}
+    You're out of money!
+    Thanks for playing!
+    {Style.RESET_ALL}"""
     print(message)
 
 def display_bet_prompt(balance):
-    print(f"\n{Back.BLACK}{Fore.CYAN}Current Balance: ${balance}{Style.RESET_ALL}")
-    print(f"{Back.BLACK}{Fore.CYAN}═══════════════════════════{Style.RESET_ALL}")
+    print(f"\n    {Fore.CYAN}Current Balance: ${balance}{Style.RESET_ALL}")
     return get_bet(balance)
 
 def display_result(message, balance_change, balance):
     result_color = Fore.GREEN if balance_change > 0 else Fore.RED if balance_change < 0 else Fore.YELLOW
     
     result = f"""
-{Back.BLACK}{result_color}═══════════════════════════
-{message}"""
+    {result_color}{message}"""
     
     if balance_change != 0:
-        result += f"\nBalance change: ${balance_change}"
+        result += f"\n    Balance change: ${balance_change}"
     
     result += f"""
-New balance: ${balance}
-═══════════════════════════{Style.RESET_ALL}"""
+    Current balance: ${balance}
+    {Style.RESET_ALL}"""
     
     print(result)
 
@@ -298,33 +307,30 @@ def reg_card_visual(card):
     ]
     return card
 
-def print_cards(cardlist):
-    # Add spacing between cards
-    spaced_cards = []
-    for card_lines in zip(*cardlist):
-        spaced_cards.append(f"{Back.BLACK}  {Style.RESET_ALL}".join(card_lines))
+def print_cards(cardlist, padding="    "):
+    if not cardlist:
+        return
     
-    # Print each line
-    for line in spaced_cards:
-        print(f"{Back.BLACK}{line}{Style.RESET_ALL}")
+    for i in range(len(cardlist[0])):
+        print(padding + "  ".join(card[i] for card in cardlist))
 
 def get_bet(balance):
     while True:
         try:
             # Prompts the user to enter their bet
-            bet = int(input(f"{Back.BLACK}{Fore.CYAN}Enter your bet (1-{balance}): {Style.RESET_ALL}"))
+            bet = int(input(f"    {Fore.CYAN}Enter your bet (1-{balance}): {Style.RESET_ALL}"))
             # Checks if the bet is valid
             if bet > 0 and bet <= balance:
                 return bet
             else:
-                print("Invalid bet, please try again.")
+                print("    Invalid bet, please try again.")
         except ValueError:
-            print("Invalid input, please enter a number.")
+            print("    Invalid input, please enter a number.")
 
 # Function to handle the player's turn
 def player_turn(player_hand, dealer_hand, bet, balance):
     while True:
-        choice = input(f"\n{Fore.YELLOW}(h)it, (s)tand, (d)ouble, (q)uit, or (?) help: {Style.RESET_ALL}").lower()
+        choice = input(f"\n    {Fore.CYAN}(h)it, (s)tand, (d)ouble, (q)uit, or (?) help: {Style.RESET_ALL}").lower()
         if choice in ['h', 'hit']:
             player_hand.append(deck.deal())
             play_sound("sounds/deal.wav")
@@ -345,7 +351,7 @@ def player_turn(player_hand, dealer_hand, bet, balance):
         elif choice in ['?', 'help']:
             display_help()
         else:
-            print(f"{Fore.RED}Invalid input, please try again.{Style.RESET_ALL}")
+            print(f"    {Fore.RED}Invalid input, please try again.{Style.RESET_ALL}")
 
 # Dealer's turn to draw cards until score is 17 or higher
 def dealer_turn(dealer_hand):
@@ -359,117 +365,141 @@ def determine_winner(player_hand, dealer_hand, bet, balance):
     
     if player_score > 21:
         play_sound("sounds/lose.wav")
-        display_result("You bust!", -bet, balance - bet)
         stats.update("loss", -bet)
+        display_result("Bust! You lose!", -bet, balance - bet)
         return balance - bet
-    elif dealer_score > 21:
+    
+    if dealer_score > 21:
         play_sound("sounds/win.wav")
+        stats.update("win", bet)
         display_result("Dealer busts! You win!", bet, balance + bet)
-        stats.update("win", bet)
         return balance + bet
-    elif player_score > dealer_score:
+    
+    if len(player_hand) == 2 and player_score == 21:
+        if len(dealer_hand) == 2 and dealer_score == 21:
+            stats.update("push", 0)
+            display_result("Both have Blackjack! Push!", 0, balance)
+            return balance
         play_sound("sounds/win.wav")
-        display_result("You win!", bet, balance + bet)
-        stats.update("win", bet)
-        return balance + bet
-    elif player_score < dealer_score:
+        stats.update("win", bet * 1.5)
+        display_result("Blackjack! You win!", int(bet * 1.5), balance + int(bet * 1.5))
+        return balance + int(bet * 1.5)
+    
+    if len(dealer_hand) == 2 and dealer_score == 21:
         play_sound("sounds/lose.wav")
-        display_result("You lose!", -bet, balance - bet)
         stats.update("loss", -bet)
+        display_result("Dealer has Blackjack! You lose!", -bet, balance - bet)
+        return balance - bet
+    
+    if player_score > dealer_score:
+        play_sound("sounds/win.wav")
+        stats.update("win", bet)
+        display_result("You win!", bet, balance + bet)
+        return balance + bet
+    elif dealer_score > player_score:
+        play_sound("sounds/lose.wav")
+        stats.update("loss", -bet)
+        display_result("Dealer wins!", -bet, balance - bet)
         return balance - bet
     else:
-        display_result("It's a tie!", 0, balance)
-        play_sound("sounds/tie.wav")
         stats.update("push", 0)
+        display_result("It's a tie!", 0, balance)
         return balance
 
 def display_help():
-    print(f"\n{Fore.CYAN}=== Blackjack Commands ==={Style.RESET_ALL}")
-    print("h or hit  - Draw another card")
-    print("s or stand - Keep your current hand")
-    print("d or double - Double your bet and receive one more card")
-    print("p or split - Split a pair into two hands (if available)")
-    print("i or insurance - Buy insurance against dealer blackjack (if available)")
-    print("q or quit - Quit the game")
-    print("? or help - Show this help menu")
-    print("\nGame Rules:")
-    print("1. Beat the dealer's hand without going over 21")
-    print("2. Face cards are worth 10, Aces are worth 1 or 11")
-    print("3. Dealer must hit on 16 and stand on 17")
-    print("4. Blackjack pays 3:2")
+    print(f"\n    {Fore.CYAN}=== Blackjack Commands ==={Style.RESET_ALL}")
+    print("    h or hit  - Draw another card")
+    print("    s or stand - Keep your current hand")
+    print("    d or double - Double your bet and receive one more card")
+    print("    p or split - Split a pair into two hands (if available)")
+    print("    i or insurance - Buy insurance against dealer blackjack (if available)")
+    print("    q or quit - Quit the game")
+    print("    ? or help - Show this help menu")
+    print("\n    Game Rules:")
+    print("    1. Beat the dealer's hand without going over 21")
+    print("    2. Face cards are worth 10, Aces are worth 1 or 11")
+    print("    3. Dealer must hit on 16 and stand on 17")
+    print("    4. Blackjack pays 3:2")
 
 def main():
     global deck, stats, balance
     parser = argparse.ArgumentParser(description='Terminal Blackjack Game')
     parser.add_argument('--no-sound', action='store_true', help='Disable sound effects')
-    parser.add_argument('--new-game', action='store_true', help='Start a new game (ignore saved game)')
     global args
     args = parser.parse_args()
-    
+
+    # Initialize pygame mixer for sound
+    if not args.no_sound:
+        pygame.mixer.init()
+
+    # Clear screen and show initial display
     clear_screen()
+    print(Back.BLACK, end='')  # Ensure black background persists
     display_title()
-    
-    deck = Deck()
-    if args.new_game:
+
+    # Load or create new game
+    if not os.path.exists("blackjack_save.json"):
         balance = 100
         stats = Stats()
     else:
         balance, stats = load_game()
-    
-    print(f"\n{Fore.CYAN}Welcome to Blackjack!{Style.RESET_ALL}")
-    print("Type ? for help and commands")
-    
+
+    print(f"    {Fore.CYAN}Welcome to Blackjack!{Style.RESET_ALL}")
+    print("    Type ? for help and commands")
+
     while balance > 0:
-        clear_screen()
-        print(Back.BLACK, end='')  # Ensure black background persists
-        display_title()
-        display_stats(stats)
-        
-        if balance <= 0:
-            display_game_over()
-            return
-        
+        # Get bet
+        bet = display_bet_prompt(balance)
+        if not bet:
+            clear_screen()
+            display_title()
+            continue
+
+        # Initialize deck if needed
+        if 'deck' not in globals():
+            deck = Deck()
+
+        # Deal initial cards
         player_hand = [deck.deal(), deck.deal()]
         dealer_hand = [deck.deal(), deck.deal()]
-
-        bet = display_bet_prompt(balance)
-        play_sound("sounds/deal.wav")
+        
         display_hands(player_hand, dealer_hand)
-        display_game_options()
-
+        
         # Check for dealer blackjack
         if calculate_score(dealer_hand[:1]) == 11:  # Dealer showing Ace
-            print(f"\n{Fore.YELLOW}Dealer is showing an Ace. Would you like insurance? (y/n){Style.RESET_ALL}")
+            print(f"\n    {Fore.CYAN}Dealer is showing an Ace. Would you like insurance? (y/n){Style.RESET_ALL}")
             if input().lower() == 'y' and balance >= bet/2:
                 insurance = bet/2
                 if calculate_score(dealer_hand) == 21:
-                    print(f"{Fore.GREEN}Dealer has Blackjack! Insurance pays 2:1{Style.RESET_ALL}")
+                    print(f"    {Fore.GREEN}Dealer has Blackjack! Insurance pays 2:1{Style.RESET_ALL}")
                     balance += insurance
                     continue
                 else:
-                    print(f"{Fore.RED}Dealer does not have Blackjack. Insurance lost.{Style.RESET_ALL}")
+                    print(f"    {Fore.RED}Dealer does not have Blackjack. Insurance lost.{Style.RESET_ALL}")
                     balance -= insurance
 
         success, bet = player_turn(player_hand, dealer_hand, bet, balance)
         if not success:
             balance = determine_winner(player_hand, dealer_hand, bet, balance)
         else:
-            dealer_success = dealer_turn(dealer_hand)
+            dealer_turn(dealer_hand)
             display_hands(player_hand, dealer_hand, hidden=False)
             balance = determine_winner(player_hand, dealer_hand, bet, balance)
 
         if balance > 0:
             display_next_move_options()
-            choice = input("Choose an option (1-3): ")
+            choice = input("    Choose an option (1-3): ")
             if choice == "2":
                 save_game(balance, stats)
-                print(f"{Fore.GREEN}Thanks for playing!{Style.RESET_ALL}")
+                print(f"    {Fore.GREEN}Thanks for playing!{Style.RESET_ALL}")
                 break
             elif choice == "3":
-                display_stats(stats)
+                stats.display(current_balance=balance)
+                input("\n    Press Enter to continue...")
             clear_screen()
             display_title()
-    else:
+
+    if balance <= 0:
         display_game_over()
 
  # Runs the main() function
