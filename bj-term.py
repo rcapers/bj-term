@@ -436,7 +436,7 @@ def main():
     print(Back.BLACK, end='')  # Ensure black background persists
     display_title()
 
-    # Load or create new game
+    # Load or create new game (only at the very start)
     if not os.path.exists("blackjack_save.json"):
         balance = 100
         stats = Stats()
@@ -447,6 +447,14 @@ def main():
     print("    Type ? for help and commands")
 
     while True:  # Changed to infinite loop since we'll always reset
+        if balance <= 0:  # Check at the start of each round
+            balance = 100  # Reset to starting balance
+            print(f"{Fore.RED}\n    You're out of money!{Style.RESET_ALL}")
+            print(f"    {Fore.GREEN}Balance reset to $100{Style.RESET_ALL}")
+            input("    Press Enter to continue...")
+            clear_screen()
+            display_title()
+
         # Get bet
         bet = display_bet_prompt(balance)
         if not bet:
@@ -484,12 +492,6 @@ def main():
             dealer_turn(dealer_hand)
             display_hands(player_hand, dealer_hand, hidden=False)
             balance = determine_winner(player_hand, dealer_hand, bet, balance)
-
-        if balance <= 0:
-            balance = display_game_over()
-            clear_screen()
-            display_title()
-            continue
 
         display_next_move_options()
         choice = input("    Choose an option (1-4): ")
