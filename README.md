@@ -68,7 +68,9 @@ The game tracks:
 
 ## Example Screenshot
 
-<img src="https://github.com/rcapers/bj-term/assets/2326739/3caff494-f743-480e-98ee-2fe403fd2522.png" width="500">
+
+<img width="579" alt="image" src="https://github.com/user-attachments/assets/07740eab-dcf9-4ba3-80ad-597d25e4383e">
+
 
 ## Development
 
