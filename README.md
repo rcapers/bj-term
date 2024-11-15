@@ -1,40 +1,83 @@
 # Terminal Blackjack
-Developed by Ryan Capers, as a way to learn Python (just because)
+A stylish command-line implementation of Blackjack with a modern dark theme interface, written in Python 3.
 
-This is a simple command-line implementation of the classic Blackjack game, written in Python 3. To run the game, follow the instructions below:
+## Features
+
+- 🎨 Modern dark theme interface with colored cards and text
+- 🎮 Intuitive gameplay with clear visual feedback
+- 💰 Persistent game statistics and balance tracking
+- 🎵 Sound effects for enhanced gaming experience
+- 📊 Detailed statistics tracking (wins, losses, streaks)
+- 💾 Auto-save functionality
+- 🎲 Professional card visuals with suit symbols
 
 ## Installation
 
-- Clone or download the repository to your local machine
-- Install pygame library by running `pip install pygame`
+1. Clone or download the repository:
+```bash
+git clone https://github.com/rcapers/bj-term.git
+cd bj-term
+```
+
+2. Install required packages:
+```bash
+pip install pygame colorama art
+```
 
 ## Usage
 
-- Open a terminal or command prompt and navigate to the directory where you cloned or downloaded the repository
-- Run the following command to start the game: `python blackjack.py` 
-- For a list of available options, use command `python blackjack.py --help`
-- Follow the on-screen instructions to play the game
+Run the game with default settings:
+```bash
+python bj-term.py
+```
 
-## Latest Functionality and Features
-- Added support for flag parameters in bj-term.py to customize the game experience
+Available options:
+```bash
+python bj-term.py --help  # Show all available options
+python bj-term.py --no-sound  # Run without sound effects
+python bj-term.py --new-game  # Start a fresh game (ignore saved data)
+```
 
-## Example Screenshot ##
+## Game Controls
 
-
-<img src="https://github.com/rcapers/bj-term/assets/2326739/3caff494-f743-480e-98ee-2fe403fd2522.png" width="500">
-
+- `H` - Hit (draw another card)
+- `S` - Stand (keep current hand)
+- `D` - Double down (double bet & draw one card)
+- `Q` - Quit (save and exit)
+- `?` - Help (show game rules)
 
 ## Game Rules
 
-The game follows the standard rules of Blackjack:
+Standard Blackjack rules apply:
+- Beat the dealer's hand without going over 21
+- Card values:
+  - Number cards (2-10): Face value
+  - Face cards (J, Q, K): 10
+  - Aces: 1 or 11
+- Dealer must hit on 16 and stand on 17
+- Blackjack pays 3:2
 
-- The player's goal is to get closer to 21 points than the dealer without going over 21
-- Numbered cards are worth their face value, face cards (Jacks, Queens, and Kings) are worth 10, and Aces are worth 1 or 11
-- The player starts with two cards and can choose to "hit" to receive additional cards or "stand" to keep their current hand
-- The dealer also starts with two cards, but only one card is visible to the player until the end of the game
-- If the player's hand exceeds 21 points, they "bust" and lose the game
-- If the dealer's hand exceeds 21 points, they "bust" and the player wins the game
-- If neither player busts, the one with the highest hand value below 22 wins the game
+## Statistics Tracking
+
+The game tracks:
+- Games played
+- Wins/Losses/Pushes
+- Biggest wins and losses
+- Current and best winning streaks
+- Current balance
+
+## Example Screenshot
+
+<img src="https://github.com/rcapers/bj-term/assets/2326739/3caff494-f743-480e-98ee-2fe403fd2522.png" width="500">
+
+## Development
+
+Developed by Ryan Capers as a Python learning project. Recent improvements include:
+- Modern dark theme interface
+- Enhanced visual card representations
+- Improved statistics display
+- Consistent UI styling
+- Better error handling
 
 ## License
 
