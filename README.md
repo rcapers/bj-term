@@ -68,7 +68,8 @@ The game tracks:
 
 ## Example Screenshot
 
-<img width="417" alt="image" src="https://github.com/user-attachments/assets/7f68c402-02f3-481d-be41-b0ff79900aa0">
+
+<img width="579" alt="image" src="https://github.com/user-attachments/assets/07740eab-dcf9-4ba3-80ad-597d25e4383e">
 
 
 ## Development
