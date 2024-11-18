@@ -652,7 +652,7 @@ def main():
         if balance <= 0:
             balance = display_game_over()
         
-        time.sleep(1.5)  # Brief pause to see the results
+        time.sleep(3)  # Increased delay to see the results
 
  # Runs the main() function
 if __name__ == "__main__":
