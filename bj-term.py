@@ -46,17 +46,18 @@ class Stats:
         
     def display(self, current_balance=None):
         stats_display = f"""{Back.BLACK}{Fore.CYAN}
-    STATISTICS
+    STATISTICS{Style.RESET_ALL}{Back.BLACK}
 
-    Games Played:   {Back.BLACK}{stats.games_played}{Style.RESET_ALL}
-    Wins:           {Back.BLACK}{Fore.GREEN}{stats.wins}{Style.RESET_ALL}
-    Losses:         {Back.BLACK}{Fore.RED}{stats.losses}{Style.RESET_ALL}
-    Pushes:         {Back.BLACK}{stats.pushes}{Style.RESET_ALL}
-    Biggest Win:    ${Back.BLACK}{Fore.GREEN}{stats.biggest_win}{Style.RESET_ALL}
-    Biggest Loss:   ${Back.BLACK}{Fore.RED}{stats.biggest_loss}{Style.RESET_ALL}
-    Current Streak: {Back.BLACK}{stats.current_streak}{Style.RESET_ALL}
-    Best Streak:    {Back.BLACK}{stats.best_streak}{Style.RESET_ALL}
-    Current Balance: ${Back.BLACK}{current_balance}{Style.RESET_ALL}
+    Games Played:   {Fore.WHITE}{self.games_played}{Style.RESET_ALL}{Back.BLACK}
+    Wins:           {Fore.GREEN}{self.wins}{Style.RESET_ALL}{Back.BLACK}
+    Losses:         {Fore.RED}{self.losses}{Style.RESET_ALL}{Back.BLACK}
+    Pushes:         {Fore.WHITE}{self.pushes}{Style.RESET_ALL}{Back.BLACK}
+    Biggest Win:    ${Fore.GREEN}{self.biggest_win}{Style.RESET_ALL}{Back.BLACK}
+    Biggest Loss:   ${Fore.RED}{self.biggest_loss}{Style.RESET_ALL}{Back.BLACK}
+    Current Streak: {Fore.WHITE}{self.current_streak}{Style.RESET_ALL}{Back.BLACK}
+    Best Streak:    {Fore.WHITE}{self.best_streak}{Style.RESET_ALL}{Back.BLACK}
+    Current Balance: ${Fore.WHITE}{current_balance}{Style.RESET_ALL}{Back.BLACK}
+
     {Style.RESET_ALL}"""
         print(stats_display)
 
@@ -104,7 +105,7 @@ class Achievements:
             self.achievements[achievement_key]['unlocked'] = True
             achievement = self.achievements[achievement_key]
             print(f"\n{Back.YELLOW}{Fore.BLACK} 🏆 Achievement Unlocked: {achievement['name']} - {achievement['desc']} 🏆 {Style.RESET_ALL}")
-            play_sound('achievement.wav')  # Will try achievement sound first, then fall back to win sound
+            play_sound('achievement')
 
 class Strategy:
     @staticmethod
@@ -152,6 +153,34 @@ from pygame import mixer
 
 sys.stdout = old_stdout
 
+# Dictionary to store loaded sounds
+sounds = {}
+
+def load_sounds():
+    """Load all sound files into memory"""
+    sound_files = {
+        'deal': 'deal.wav',
+        'win': 'win.wav',
+        'lose': 'lose.wav',
+        'achievement': 'win.wav'  # Use win sound for achievements until we have a proper one
+    }
+    
+    for sound_name, filename in sound_files.items():
+        try:
+            sound_path = os.path.join(os.path.dirname(__file__), 'sounds', filename)
+            if os.path.exists(sound_path):
+                sounds[sound_name] = mixer.Sound(sound_path)
+        except:
+            print(f"{Back.BLACK}    Warning: Could not load sound {filename}{Style.RESET_ALL}")
+
+def play_sound(sound_name):
+    """Play a sound by its name"""
+    if not args.no_sound and sound_name in sounds:
+        try:
+            sounds[sound_name].play()
+        except:
+            pass  # Silently fail if sound playback fails
+
 # Clear the terminal or console screen
 def clear_screen():
     os.system('clear' if os.name == 'posix' else 'cls')
@@ -168,22 +197,7 @@ def clear_screen():
 # Initialize pygame and mixer
 pygame.init()
 mixer.init()
-
-# Function to play a sound file
-def play_sound(file):
-    if not args.no_sound:
-        try:
-            sound_file = os.path.join(os.path.dirname(__file__), 'sounds', file)
-            if os.path.exists(sound_file):
-                mixer.Sound(sound_file).play()
-            elif file == 'achievement.wav':
-                # Fallback to win sound if achievement sound is not found
-                fallback_file = os.path.join(os.path.dirname(__file__), 'sounds', 'win.wav')
-                if os.path.exists(fallback_file):
-                    mixer.Sound(fallback_file).play()
-        except:
-            # Silently fail if sound file is missing or there's an error
-            pass
+load_sounds()
 
 # Function to randomly deal a card
 def deal_card():
@@ -344,7 +358,7 @@ def display_game_over():
 {Back.BLACK}    Better luck next time!{Style.RESET_ALL}{Back.BLACK}
 {Back.BLACK}"""
     print(message)
-    input(f"{Back.BLACK}    Press Enter to continue...{Style.RESET_ALL}{Back.BLACK}")
+    input(f"{Back.BLACK}    Press Enter to continue...{Style.RESET_ALL}")
     return 100
 
 def display_bet_prompt(balance):
@@ -405,12 +419,12 @@ def reg_card_visual(card):
     ]
     return card
 
-def dealer_turn(dealer_hand):
+def dealer_turn(dealer_hand, player_hand):
     """Handle dealer's turn according to standard Blackjack rules."""
     while calculate_score(dealer_hand) < 17:  # Dealer must hit on 16 and below
         dealer_hand.append(deck.deal())
-        play_sound("sounds/deal.wav")
-        display_hands(dealer_hand, dealer_hand, hidden=False)
+        play_sound('deal')
+        display_hands(player_hand, dealer_hand, hidden=False)
         time.sleep(1)  # Add a slight delay for dramatic effect
 
 def determine_winner(player_hand, dealer_hand, bet, balance):
@@ -421,6 +435,7 @@ def determine_winner(player_hand, dealer_hand, bet, balance):
     # Handle player bust
     if player_score > 21:
         display_result("Bust! You lose!", -bet, balance - bet)
+        play_sound('lose')
         stats.update("loss", -bet)
         return balance - bet
 
@@ -429,6 +444,7 @@ def determine_winner(player_hand, dealer_hand, bet, balance):
         amount = bet if len(player_hand) > 2 else int(bet * 1.5)
         new_balance = balance + amount
         display_result("Dealer busts! You win!", amount, new_balance)
+        play_sound('win')
         stats.update("win", amount)
         
         # Check achievements only on wins
@@ -446,6 +462,7 @@ def determine_winner(player_hand, dealer_hand, bet, balance):
             amount = int(bet * 1.5)
             new_balance = balance + amount
             display_result("Blackjack! You win!", amount, new_balance)
+            play_sound('win')
             stats.update("win", amount)
             
             # Check achievements for blackjack win
@@ -459,6 +476,7 @@ def determine_winner(player_hand, dealer_hand, bet, balance):
         amount = bet
         new_balance = balance + amount
         display_result("You win!", amount, new_balance)
+        play_sound('win')
         stats.update("win", amount)
         
         # Check achievements on regular win
@@ -468,6 +486,7 @@ def determine_winner(player_hand, dealer_hand, bet, balance):
     elif dealer_score > player_score:
         new_balance = balance - bet
         display_result("Dealer wins!", -bet, new_balance)
+        play_sound('lose')
         stats.update("loss", -bet)
         return new_balance
     else:
@@ -494,16 +513,17 @@ def player_turn(player_hand, dealer_hand, bet, balance):
         choice = input(f"\n{Back.BLACK}    {Fore.CYAN}(h)it, (s)tand, (d)ouble, (q)uit, or (?) help: {Style.RESET_ALL}{Back.BLACK}").lower()
         if choice in ['h', 'hit']:
             player_hand.append(deck.deal())
-            play_sound("sounds/deal.wav")
+            play_sound('deal')
             display_hands(player_hand, dealer_hand)
             if calculate_score(player_hand) > 21:
+                play_sound('lose')
                 return ('bust', bet)
         elif choice in ['s', 'stand', 'stay']:
             return ('stand', bet)
         elif choice in ['d', 'dbl', 'double']:
             if len(player_hand) == 2 and balance >= bet:
                 player_hand.append(deck.deal())
-                play_sound("sounds/deal.wav")
+                play_sound('deal')
                 display_hands(player_hand, dealer_hand)
                 return ('double', bet * 2)
             else:
@@ -515,7 +535,7 @@ def player_turn(player_hand, dealer_hand, bet, balance):
             display_hands(player_hand, dealer_hand)
         else:
             print(f"{Back.BLACK}    Invalid choice. Type ? for help.{Style.RESET_ALL}{Back.BLACK}")
-        
+
         # Add progressive betting suggestion
         if stats.hot_streak >= 2:
             suggested_bet = min(bet * 2, balance)
@@ -538,16 +558,22 @@ def display_help():
     print(f"{Back.BLACK}    • Blackjack (A + 10/Face card) pays 3:2{Style.RESET_ALL}{Back.BLACK}")
 
 def main():
-    global deck, stats, balance, achievements
+    global deck, stats, balance, achievements, args
+    
     parser = argparse.ArgumentParser(description='Terminal Blackjack Game')
     parser.add_argument('--no-sound', action='store_true', help='Disable sound effects')
     parser.add_argument('--no-hints', action='store_true', help='Disable strategy hints')
-    global args
     args = parser.parse_args()
 
     # Initialize pygame mixer for sound
     if not args.no_sound:
-        pygame.mixer.init()
+        try:
+            pygame.init()
+            mixer.init()
+            load_sounds()
+        except:
+            print(f"{Back.BLACK}    Warning: Sound initialization failed. Running without sound.{Style.RESET_ALL}")
+            args.no_sound = True
 
     # Clear screen and show initial display
     clear_screen()
@@ -616,9 +642,10 @@ def main():
             stats.update("loss", -bet)
             continue
         else:
-            dealer_turn(dealer_hand)
-            display_hands(player_hand, dealer_hand, hidden=False)
-            balance = determine_winner(player_hand, dealer_hand, bet, balance)
+            dealer_turn(dealer_hand, player_hand)  # Pass both hands in correct order
+        
+        # Determine winner and update balance
+        balance = determine_winner(player_hand, dealer_hand, bet, balance)
 
         display_next_move_options()
         choice = input("    Choose an option (1-4): ")
