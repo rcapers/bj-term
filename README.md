@@ -94,8 +94,7 @@ The game tracks:
 - Achievement progress
 
 ## Example Screenshot
-
-<img width="579" alt="image" src="https://github.com/user-attachments/assets/07740eab-dcf9-4ba3-80ad-597d25e4383e">
+<img width="554" alt="2024-11-18_15-52-52" src="https://github.com/user-attachments/assets/147fbc0e-0fab-45e5-83fc-dd4b28ea086a">
 
 ## Development
 
