@@ -23,6 +23,8 @@ class Stats:
         self.biggest_loss = 0
         self.current_streak = 0
         self.best_streak = 0
+        self.hot_streak = 0
+        self.card_count = 0
         
     def update(self, result, amount):
         self.games_played += 1
@@ -30,13 +32,16 @@ class Stats:
             self.wins += 1
             self.current_streak = max(1, self.current_streak + 1)
             self.biggest_win = max(self.biggest_win, amount)
+            self.hot_streak += 1
         elif result == "loss":
             self.losses += 1
             self.current_streak = min(-1, self.current_streak - 1)
             self.biggest_loss = min(self.biggest_loss, amount)
+            self.hot_streak = 0
         else:  # push
             self.pushes += 1
             self.current_streak = 0
+            self.hot_streak = 0
         self.best_streak = max(self.best_streak, abs(self.current_streak))
         
     def display(self, current_balance=None):
@@ -69,6 +74,54 @@ class Deck:
         if len(self.cards) < 10:  # Reshuffle when deck gets low
             self.reset()
         return self.cards.pop()
+
+class Achievements:
+    def __init__(self):
+        self.achievements = {
+            'high_roller': {'name': 'High Roller', 'desc': 'Win with a bet of $500 or more', 'unlocked': False},
+            'blackjack_master': {'name': 'Blackjack Master', 'desc': 'Get 5 blackjacks', 'count': 0, 'unlocked': False},
+            'comeback_king': {'name': 'Comeback King', 'desc': 'Win after being down to less than 20% of starting balance', 'unlocked': False},
+            'lucky_seven': {'name': 'Lucky Seven', 'desc': 'Win 7 hands in a row', 'unlocked': False},
+            'card_counter': {'name': 'Card Counter', 'desc': 'Win 10 hands in one session', 'count': 0, 'unlocked': False}
+        }
+        self.starting_balance = 100  # Track starting balance for comeback achievement
+    
+    def check_achievement(self, achievement_key, condition):
+        if not self.achievements[achievement_key]['unlocked']:
+            if achievement_key == 'blackjack_master' and condition:
+                self.achievements[achievement_key]['count'] += 1
+                if self.achievements[achievement_key]['count'] >= 5:
+                    self.unlock_achievement(achievement_key)
+            elif achievement_key == 'card_counter' and condition:
+                self.achievements[achievement_key]['count'] += 1
+                if self.achievements[achievement_key]['count'] >= 10:
+                    self.unlock_achievement(achievement_key)
+            elif condition:
+                self.unlock_achievement(achievement_key)
+
+    def unlock_achievement(self, achievement_key):
+        if not self.achievements[achievement_key]['unlocked']:
+            self.achievements[achievement_key]['unlocked'] = True
+            achievement = self.achievements[achievement_key]
+            print(f"\n{Back.YELLOW}{Fore.BLACK} 🏆 Achievement Unlocked: {achievement['name']} - {achievement['desc']} 🏆 {Style.RESET_ALL}")
+            play_sound('achievement.wav')  # Will try achievement sound first, then fall back to win sound
+
+class Strategy:
+    @staticmethod
+    def get_basic_strategy(player_score, dealer_up_card_value, has_ace):
+        dealer_value = 10 if dealer_up_card_value in ['J', 'Q', 'K'] else (11 if dealer_up_card_value == 'A' else int(dealer_up_card_value))
+        
+        if has_ace:  # Soft hands
+            if player_score >= 19: return 'Stand'
+            if player_score == 18:
+                if dealer_value in [9, 10, 11]: return 'Hit'
+                return 'Stand'
+            return 'Hit'
+        else:  # Hard hands
+            if player_score >= 17: return 'Stand'
+            if player_score <= 11: return 'Hit'
+            if player_score >= 13 and dealer_value <= 6: return 'Stand'
+            return 'Hit'
 
 def save_game(balance, stats):
     save_data = {
@@ -119,7 +172,18 @@ mixer.init()
 # Function to play a sound file
 def play_sound(file):
     if not args.no_sound:
-        mixer.Sound(file).play()
+        try:
+            sound_file = os.path.join(os.path.dirname(__file__), 'sounds', file)
+            if os.path.exists(sound_file):
+                mixer.Sound(sound_file).play()
+            elif file == 'achievement.wav':
+                # Fallback to win sound if achievement sound is not found
+                fallback_file = os.path.join(os.path.dirname(__file__), 'sounds', 'win.wav')
+                if os.path.exists(fallback_file):
+                    mixer.Sound(fallback_file).play()
+        except:
+            # Silently fail if sound file is missing or there's an error
+            pass
 
 # Function to randomly deal a card
 def deal_card():
@@ -145,6 +209,14 @@ def calculate_score(hand):
     while total > 21 and aces > 0:
         total -= 10
         aces -= 1
+
+    # Update card counting
+    for card in hand:
+        value = card["value"]
+        if value in ["10", "J", "Q", "K", "A"]:
+            stats.card_count -= 1
+        elif value in ["2", "3", "4", "5", "6"]:
+            stats.card_count += 1
 
     return total
 
@@ -186,6 +258,23 @@ def display_hands(player_hand, dealer_hand, hidden=True):
     print(f"{Back.BLACK}    {color}{score}{Style.RESET_ALL}{Back.BLACK}")
     print_cards([reg_card_visual(c) for c in player_hand], padding=f"{Back.BLACK}    ")
     print(Back.BLACK)
+    
+    # Add card counting hint
+    if not hidden and not args.no_hints:
+        count_status = "High" if stats.card_count > 3 else "Low" if stats.card_count < -3 else "Neutral"
+        print(f"{Back.BLACK}    {Fore.CYAN}Card Count Status: {count_status}{Style.RESET_ALL}")
+    
+    # Add basic strategy hint
+    if not args.no_hints:
+        dealer_up_card = dealer_hand[0]["value"]
+        player_score = calculate_score(player_hand)
+        has_ace = any(card["value"] == "A" for card in player_hand)
+        suggestion = Strategy.get_basic_strategy(player_score, dealer_up_card, has_ace)
+        print(f"{Back.BLACK}    {Fore.CYAN}Suggested Play: {suggestion}{Style.RESET_ALL}")
+    
+    # Show hot/cold streak
+    if stats.hot_streak >= 3:
+        print(f"{Back.BLACK}    {Fore.RED}🔥 Hot Streak: {stats.hot_streak} wins in a row! 🔥{Style.RESET_ALL}")
 
 def hidden_card():
     card = [
@@ -278,49 +367,6 @@ def get_bet(balance):
         except ValueError:
             print(f"{Back.BLACK}    Invalid input, please enter a number.{Style.RESET_ALL}{Back.BLACK}")
 
-def player_turn(player_hand, dealer_hand, bet, balance):
-    while True:
-        choice = input(f"\n{Back.BLACK}    {Fore.CYAN}(h)it, (s)tand, (d)ouble, (q)uit, or (?) help: {Style.RESET_ALL}{Back.BLACK}").lower()
-        if choice in ['h', 'hit']:
-            player_hand.append(deck.deal())
-            play_sound("sounds/deal.wav")
-            display_hands(player_hand, dealer_hand)
-            if calculate_score(player_hand) > 21:
-                return ('bust', bet)
-        elif choice in ['s', 'stand', 'stay']:
-            return ('stand', bet)
-        elif choice in ['d', 'dbl', 'double']:
-            if len(player_hand) == 2 and balance >= bet:
-                player_hand.append(deck.deal())
-                play_sound("sounds/deal.wav")
-                display_hands(player_hand, dealer_hand)
-                return ('double', bet * 2)
-            else:
-                print(f"{Back.BLACK}    You can only double down on your first two cards and if you have enough balance.{Style.RESET_ALL}{Back.BLACK}")
-        elif choice in ['q', 'quit']:
-            return ('quit', bet)
-        elif choice == '?':
-            display_help()
-            display_hands(player_hand, dealer_hand)
-        else:
-            print(f"{Back.BLACK}    Invalid choice. Type ? for help.{Style.RESET_ALL}{Back.BLACK}")
-
-def display_help():
-    print(f"\n{Back.BLACK}    {Fore.CYAN}=== Blackjack Commands ==={Style.RESET_ALL}{Back.BLACK}")
-    print(f"{Back.BLACK}    h or hit  - Draw another card{Style.RESET_ALL}{Back.BLACK}")
-    print(f"{Back.BLACK}    s or stay - Keep your current hand{Style.RESET_ALL}{Back.BLACK}")
-    print(f"{Back.BLACK}    d or dbl  - Double down (double bet, one more card){Style.RESET_ALL}{Back.BLACK}")
-    print(f"{Back.BLACK}    q or quit - Save and exit game{Style.RESET_ALL}{Back.BLACK}")
-    print(f"{Back.BLACK}    ?        - Show this help message{Style.RESET_ALL}{Back.BLACK}")
-    
-    print(f"\n{Back.BLACK}    {Fore.CYAN}=== Game Rules ==={Style.RESET_ALL}{Back.BLACK}")
-    print(f"{Back.BLACK}    • Try to get closer to 21 than the dealer without going over{Style.RESET_ALL}{Back.BLACK}")
-    print(f"{Back.BLACK}    • Number cards are worth their face value{Style.RESET_ALL}{Back.BLACK}")
-    print(f"{Back.BLACK}    • Face cards (J, Q, K) are worth 10{Style.RESET_ALL}{Back.BLACK}")
-    print(f"{Back.BLACK}    • Aces are worth 11 or 1, whichever is better{Style.RESET_ALL}{Back.BLACK}")
-    print(f"{Back.BLACK}    • Dealer must hit on 16 and below, stand on 17 and above{Style.RESET_ALL}{Back.BLACK}")
-    print(f"{Back.BLACK}    • Blackjack (A + 10/Face card) pays 3:2{Style.RESET_ALL}{Back.BLACK}")
-
 def print_cards(cardlist, padding=""):
     if not cardlist:
         return
@@ -372,45 +418,130 @@ def determine_winner(player_hand, dealer_hand, bet, balance):
     player_score = calculate_score(player_hand)
     dealer_score = calculate_score(dealer_hand)
     
-    # Handle blackjack cases
-    player_blackjack = len(player_hand) == 2 and player_score == 21
-    dealer_blackjack = len(dealer_hand) == 2 and dealer_score == 21
-    
-    if player_blackjack and not dealer_blackjack:
-        winnings = int(bet * 1.5)  # Blackjack pays 3:2
-        balance += winnings
-        display_result("Blackjack! You win!", winnings, balance)
-        stats.update("win", winnings)
-    elif dealer_blackjack and not player_blackjack:
-        balance -= bet
-        display_result("Dealer has Blackjack! You lose!", -bet, balance)
+    # Handle player bust
+    if player_score > 21:
+        display_result("Bust! You lose!", -bet, balance - bet)
         stats.update("loss", -bet)
-    elif player_blackjack and dealer_blackjack:
-        display_result("Both have Blackjack! Push!", 0, balance)
-        stats.update("push", 0)
-    # Handle regular cases
-    elif dealer_score > 21:
-        balance += bet
-        display_result("Dealer busts! You win!", bet, balance)
-        stats.update("win", bet)
-    elif player_score > dealer_score:
-        balance += bet
-        display_result("You win!", bet, balance)
-        stats.update("win", bet)
+        return balance - bet
+
+    # Handle dealer bust
+    if dealer_score > 21:
+        amount = bet if len(player_hand) > 2 else int(bet * 1.5)
+        new_balance = balance + amount
+        display_result("Dealer busts! You win!", amount, new_balance)
+        stats.update("win", amount)
+        
+        # Check achievements only on wins
+        check_achievements(player_hand, dealer_hand, bet, balance, amount)
+        
+        return new_balance
+
+    # Handle blackjack
+    if len(player_hand) == 2 and player_score == 21:
+        if len(dealer_hand) == 2 and dealer_score == 21:
+            display_result("Both have Blackjack! Push!", 0, balance)
+            stats.update("push", 0)
+            return balance
+        else:
+            amount = int(bet * 1.5)
+            new_balance = balance + amount
+            display_result("Blackjack! You win!", amount, new_balance)
+            stats.update("win", amount)
+            
+            # Check achievements for blackjack win
+            achievements.check_achievement('blackjack_master', True)
+            check_achievements(player_hand, dealer_hand, bet, balance, amount)
+            
+            return new_balance
+
+    # Compare scores
+    if player_score > dealer_score:
+        amount = bet
+        new_balance = balance + amount
+        display_result("You win!", amount, new_balance)
+        stats.update("win", amount)
+        
+        # Check achievements on regular win
+        check_achievements(player_hand, dealer_hand, bet, balance, amount)
+        
+        return new_balance
     elif dealer_score > player_score:
-        balance -= bet
-        display_result("Dealer wins!", -bet, balance)
+        new_balance = balance - bet
+        display_result("Dealer wins!", -bet, new_balance)
         stats.update("loss", -bet)
+        return new_balance
     else:
         display_result("Push!", 0, balance)
         stats.update("push", 0)
+        return balance
+
+def check_achievements(player_hand, dealer_hand, bet, balance, amount):
+    # High Roller achievement
+    achievements.check_achievement('high_roller', bet >= 500)
     
-    return balance
+    # Comeback King achievement (win after being down to less than 20% of starting balance)
+    if balance <= (achievements.starting_balance * 0.2):
+        achievements.check_achievement('comeback_king', True)
+    
+    # Lucky Seven achievement
+    achievements.check_achievement('lucky_seven', stats.hot_streak == 7)
+    
+    # Card Counter achievement (tracks total wins in check_achievement)
+    achievements.check_achievement('card_counter', True)
+
+def player_turn(player_hand, dealer_hand, bet, balance):
+    while True:
+        choice = input(f"\n{Back.BLACK}    {Fore.CYAN}(h)it, (s)tand, (d)ouble, (q)uit, or (?) help: {Style.RESET_ALL}{Back.BLACK}").lower()
+        if choice in ['h', 'hit']:
+            player_hand.append(deck.deal())
+            play_sound("sounds/deal.wav")
+            display_hands(player_hand, dealer_hand)
+            if calculate_score(player_hand) > 21:
+                return ('bust', bet)
+        elif choice in ['s', 'stand', 'stay']:
+            return ('stand', bet)
+        elif choice in ['d', 'dbl', 'double']:
+            if len(player_hand) == 2 and balance >= bet:
+                player_hand.append(deck.deal())
+                play_sound("sounds/deal.wav")
+                display_hands(player_hand, dealer_hand)
+                return ('double', bet * 2)
+            else:
+                print(f"{Back.BLACK}    You can only double down on your first two cards and if you have enough balance.{Style.RESET_ALL}{Back.BLACK}")
+        elif choice in ['q', 'quit']:
+            return ('quit', bet)
+        elif choice == '?':
+            display_help()
+            display_hands(player_hand, dealer_hand)
+        else:
+            print(f"{Back.BLACK}    Invalid choice. Type ? for help.{Style.RESET_ALL}{Back.BLACK}")
+        
+        # Add progressive betting suggestion
+        if stats.hot_streak >= 2:
+            suggested_bet = min(bet * 2, balance)
+            print(f"{Back.BLACK}    {Fore.YELLOW}Hot Streak! Consider increasing your bet to ${suggested_bet}{Style.RESET_ALL}")
+
+def display_help():
+    print(f"\n{Back.BLACK}    {Fore.CYAN}=== Blackjack Commands ==={Style.RESET_ALL}{Back.BLACK}")
+    print(f"{Back.BLACK}    h or hit  - Draw another card{Style.RESET_ALL}{Back.BLACK}")
+    print(f"{Back.BLACK}    s or stay - Keep your current hand{Style.RESET_ALL}{Back.BLACK}")
+    print(f"{Back.BLACK}    d or dbl  - Double down (double bet, one more card){Style.RESET_ALL}{Back.BLACK}")
+    print(f"{Back.BLACK}    q or quit - Save and exit game{Style.RESET_ALL}{Back.BLACK}")
+    print(f"{Back.BLACK}    ?        - Show this help message{Style.RESET_ALL}{Back.BLACK}")
+    
+    print(f"\n{Back.BLACK}    {Fore.CYAN}=== Game Rules ==={Style.RESET_ALL}{Back.BLACK}")
+    print(f"{Back.BLACK}    • Try to get closer to 21 than the dealer without going over{Style.RESET_ALL}{Back.BLACK}")
+    print(f"{Back.BLACK}    • Number cards are worth their face value{Style.RESET_ALL}{Back.BLACK}")
+    print(f"{Back.BLACK}    • Face cards (J, Q, K) are worth 10{Style.RESET_ALL}{Back.BLACK}")
+    print(f"{Back.BLACK}    • Aces are worth 11 or 1, whichever is better{Style.RESET_ALL}{Back.BLACK}")
+    print(f"{Back.BLACK}    • Dealer must hit on 16 and below, stand on 17 and above{Style.RESET_ALL}{Back.BLACK}")
+    print(f"{Back.BLACK}    • Blackjack (A + 10/Face card) pays 3:2{Style.RESET_ALL}{Back.BLACK}")
 
 def main():
-    global deck, stats, balance
+    global deck, stats, balance, achievements
     parser = argparse.ArgumentParser(description='Terminal Blackjack Game')
     parser.add_argument('--no-sound', action='store_true', help='Disable sound effects')
+    parser.add_argument('--no-hints', action='store_true', help='Disable strategy hints')
     global args
     args = parser.parse_args()
 
@@ -432,6 +563,8 @@ def main():
 
     print(f"{Back.BLACK}    {Fore.CYAN}Welcome to Blackjack!{Style.RESET_ALL}{Back.BLACK}")
     print(f"{Back.BLACK}    Type ? for help and commands{Style.RESET_ALL}{Back.BLACK}")
+    
+    achievements = Achievements()
 
     while True:  # Changed to infinite loop since we'll always reset
         if balance <= 0:  # Check at the start of each round
