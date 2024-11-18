@@ -10,6 +10,25 @@ A stylish command-line implementation of Blackjack with a modern dark theme inte
 - 📊 Detailed statistics tracking (wins, losses, streaks)
 - 💾 Auto-save functionality
 - 🎲 Professional card visuals with suit symbols
+- 🏆 Achievement system with unlockable rewards
+- 🧠 Strategic gameplay assistance
+- 📈 Card counting and streak tracking
+
+## Achievement System
+
+Unlock special achievements as you play:
+- **High Roller**: Win with a bet of $500 or more
+- **Blackjack Master**: Get 5 natural blackjacks
+- **Comeback King**: Win after being down to less than 20% of starting balance
+- **Lucky Seven**: Win 7 hands in a row
+- **Card Counter**: Win 10 hands in one session
+
+## Strategy Features
+
+- Basic strategy hints for optimal play
+- Card counting status indicator
+- Hot streak tracking
+- Progressive betting suggestions
 
 ## Installation
 
@@ -39,9 +58,9 @@ python bj-term.py
 
 Available options:
 ```bash
-python bj-term.py --help  # Show all available options
-python bj-term.py --no-sound  # Run without sound effects
-python bj-term.py --new-game  # Start a fresh game (ignore saved data)
+python bj-term.py --help     # Show all available options
+python bj-term.py --no-sound # Run without sound effects
+python bj-term.py --no-hints # Disable strategy hints
 ```
 
 ## Game Controls
@@ -70,22 +89,22 @@ The game tracks:
 - Wins/Losses/Pushes
 - Biggest wins and losses
 - Current and best winning streaks
-- Current balance
+- Hot streak status
+- Card counting progress
+- Achievement progress
 
 ## Example Screenshot
 
-
 <img width="579" alt="image" src="https://github.com/user-attachments/assets/07740eab-dcf9-4ba3-80ad-597d25e4383e">
-
 
 ## Development
 
 Developed by Ryan Capers as a Python learning project. Recent improvements include:
-- Modern dark theme interface
-- Enhanced visual card representations
-- Improved statistics display
-- Consistent UI styling
-- Better error handling
+- Achievement system
+- Strategy assistance
+- Enhanced statistics tracking
+- Card counting features
+- Progressive betting system
 
 ## License
 
