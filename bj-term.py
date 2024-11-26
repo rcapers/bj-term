@@ -355,22 +355,33 @@ def display_next_move_options():
     print(f"{Back.BLACK}    4. Reset balance to $100{Style.RESET_ALL}{Back.BLACK}")
 
 def display_game_over():
-    message = f"""{Back.BLACK}
-{Back.BLACK}    Game Over! Your balance has been reset to $100.
-{Back.BLACK}    Better luck next time!{Style.RESET_ALL}{Back.BLACK}
-{Back.BLACK}"""
-    print(message)
-    input(f"{Back.BLACK}    Press Enter to continue...{Style.RESET_ALL}{Back.BLACK}")
-    return 100
-
-def display_bet_prompt(balance):
-    print(f"\n{Back.BLACK}    {Fore.CYAN}Current Balance: ${balance}{Style.RESET_ALL}{Back.BLACK}")
-    return get_bet(balance)
-
-def display_result(message, amount, new_balance):
-    color = Fore.GREEN if amount > 0 else Fore.RED if amount < 0 else Fore.YELLOW
-    print(f"\n{Back.BLACK}    {color}{message}{Style.RESET_ALL}{Back.BLACK}")
-    print(f"{Back.BLACK}    New Balance: ${new_balance}{Style.RESET_ALL}{Back.BLACK}")
+    """Display game over screen and handle restart."""
+    clear_screen()
+    print(Back.BLACK, end='')
+    print(f"""
+{Back.BLACK}    {Fore.RED}  ▄████  ▄▄▄       ███▄ ▄███▓▓█████     ▒█████   ██▒   █▓▓█████  ██▀███  {Style.RESET_ALL}{Back.BLACK}
+{Back.BLACK}    {Fore.RED} ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀    ▒██▒  ██▒▓██░   █▒▓█   ▀ ▓██ ▒ ██▒{Style.RESET_ALL}{Back.BLACK}
+{Back.BLACK}    {Fore.RED}▒██░▄▄▄░▒██  ▀█▄  ▓██    ▓██░▒███      ▒██░  ██▒ ▓██  █▒░▒███   ▓██ ░▄█ ▒{Style.RESET_ALL}{Back.BLACK}
+{Back.BLACK}    {Fore.RED}░▓█  ██▓░██▄▄▄▄██ ▒██    ▒██ ▒▓█  ▄    ▒██   ██░  ▒██ █░░▒▓█  ▄ ▒██▀▀█▄  {Style.RESET_ALL}{Back.BLACK}
+{Back.BLACK}    {Fore.RED}░▒▓███▀▒ ▓█   ▓██▒▒██▒   ░██▒░▒████▒   ░ ████▓▒░   ▒▀█░  ░▒████▒░██▓ ▒██▒{Style.RESET_ALL}{Back.BLACK}
+{Back.BLACK}    {Fore.RED} ░▒   ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░░ ▒░ ░   ░ ▒░▒░▒░    ░ ▐░  ░░ ▒░ ░░ ▒▓ ░▒▓░{Style.RESET_ALL}{Back.BLACK}
+{Back.BLACK}    {Fore.RED}  ░   ░   ▒   ▒▒ ░░  ░      ░ ░ ░  ░     ░ ▒ ▒░    ░ ░░   ░ ░  ░  ░▒ ░ ▒░{Style.RESET_ALL}{Back.BLACK}
+{Back.BLACK}    {Fore.RED}░ ░   ░   ░   ▒   ░      ░      ░      ░ ░ ░ ▒       ░░     ░     ░░   ░ {Style.RESET_ALL}{Back.BLACK}
+{Back.BLACK}    {Fore.RED}      ░       ░  ░       ░      ░  ░       ░ ░        ░     ░  ░   ░     {Style.RESET_ALL}{Back.BLACK}
+{Back.BLACK}    {Fore.RED}                                                      ░                    {Style.RESET_ALL}{Back.BLACK}
+""")
+    print(f"{Back.BLACK}    {Fore.CYAN}You've run out of money! Would you like to start fresh with $100?{Style.RESET_ALL}{Back.BLACK}")
+    while True:
+        choice = input(f"{Back.BLACK}    {Fore.CYAN}(y)es or (n)o: {Style.RESET_ALL}{Back.BLACK}").lower()
+        if choice in ['y', 'yes']:
+            # Reset stats and balance
+            global stats
+            stats = Stats()  # Reset stats for new game
+            return 100  # Give player fresh start with $100
+        elif choice in ['n', 'no']:
+            sys.exit()  # Exit game
+        else:
+            print(f"{Back.BLACK}    Invalid choice. Please enter 'y' or 'n'.{Style.RESET_ALL}{Back.BLACK}")
 
 def get_bet(balance):
     while True:
@@ -569,6 +580,11 @@ def display_help():
     print(help_text)
     input()  # Wait for user input before continuing
 
+def display_result(message, amount, new_balance):
+    color = Fore.GREEN if amount > 0 else Fore.RED if amount < 0 else Fore.YELLOW
+    print(f"\n{Back.BLACK}    {color}{message}{Style.RESET_ALL}{Back.BLACK}")
+    print(f"{Back.BLACK}    New Balance: ${new_balance}{Style.RESET_ALL}{Back.BLACK}")
+
 def main():
     global deck, stats, balance, achievements, args
     
@@ -598,6 +614,11 @@ def main():
         clear_screen()
         print(Back.BLACK, end='')  # Ensure black background persists
         display_title(balance)
+        
+        # Check if player is out of money before asking for bet
+        if balance <= 0:
+            balance = display_game_over()
+            continue
         
         # Get bet or command
         bet_input = input(f"{Back.BLACK}    {Fore.CYAN}Enter bet (1-{balance}) or command: {Style.RESET_ALL}{Back.BLACK}").lower()
@@ -647,10 +668,6 @@ def main():
         
         # Save game after each hand
         save_game(balance, stats)
-        
-        # Check if player is out of money
-        if balance <= 0:
-            balance = display_game_over()
         
         time.sleep(3)  # Increased delay to see the results
 
