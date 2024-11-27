@@ -305,7 +305,7 @@ def display_stats(stats, current_balance=None):
 {Back.BLACK}    {Fore.RED}Biggest Loss: ${stats.biggest_loss}{Style.RESET_ALL}{Back.BLACK}
 {Back.BLACK}    {Fore.CYAN}Current Streak: {stats.current_streak}{Style.RESET_ALL}{Back.BLACK}
 {Back.BLACK}    {Fore.CYAN}Best Streak: {stats.best_streak}{Style.RESET_ALL}{Back.BLACK}
-{Back.BLACK}"""
+"""
     if current_balance is not None:
         stats_display += f"{Back.BLACK}    {Fore.YELLOW}Current Balance: ${current_balance}{Style.RESET_ALL}{Back.BLACK}"
     print(stats_display)
@@ -346,22 +346,29 @@ def display_next_move_options():
 
 def get_player_action(hand, dealer_up_card, balance, bet):
     """Get the player's action choice."""
-    can_double = len(hand) == 2 and balance >= bet
-    
     while True:
         display_game_options()
         choice = input(f"\n{Back.BLACK}    {Fore.CYAN}(h)it, (s)tand, (d)ouble, (q)uit, or (?) help: {Style.RESET_ALL}{Back.BLACK}").lower()
         if choice in ['h', 'hit']:
-            return 'hit'
+            hand.append(deck.deal())
+            play_sound('deal')
+            display_hands(hand, [dealer_up_card], balance=balance)
+            if calculate_score(hand) > 21:
+                play_sound('lose')
+                return ('bust', bet)
+            return ('hit', bet)
         elif choice in ['s', 'stand', 'stay']:
-            return 'stand'
+            return ('stand', bet)
         elif choice in ['d', 'dbl', 'double']:
-            if can_double:
-                return 'double'
+            if len(hand) == 2 and balance >= bet:
+                hand.append(deck.deal())
+                play_sound('deal')
+                display_hands(hand, [dealer_up_card], balance=balance)
+                return ('double', bet * 2)
             else:
                 print(f"{Back.BLACK}    You can only double down on your first two cards and if you have enough balance.{Style.RESET_ALL}{Back.BLACK}")
         elif choice in ['q', 'quit']:
-            return 'quit'
+            return ('quit', bet)
         elif choice == '?':
             display_help()
             display_hands(hand, [dealer_up_card], balance=balance)
@@ -465,7 +472,7 @@ def dealer_turn(dealer_hand, player_hand, balance):
         dealer_hand.append(deck.deal())
         play_sound('deal')
         display_hands(player_hand, dealer_hand, hidden=False, balance=balance)
-        time.sleep(1)  # Add a slight delay for dramatic effect
+        time.sleep(0.3)  # Add a slight delay for dramatic effect
 
 def determine_winner(player_hand, dealer_hand, bet, balance):
     """Determine the winner and update balance accordingly."""
@@ -474,11 +481,10 @@ def determine_winner(player_hand, dealer_hand, bet, balance):
     
     # Always show dealer's cards before announcing result
     display_hands(player_hand, dealer_hand, hidden=False, balance=balance)
-    time.sleep(1)  # Brief pause to see dealer's cards
+    time.sleep(0.3)  # Brief pause to see dealer's cards
     
     # Handle player bust
     if player_score > 21:
-        play_sound('lose')
         display_result("Bust! You lose!", -bet, balance - bet)
         stats.update("loss", -bet)
         return balance - bet
@@ -553,6 +559,12 @@ def check_achievements(player_hand, dealer_hand, bet, balance, amount):
     # Lucky Seven achievement
     achievements.check_achievement('lucky_seven', stats.hot_streak == 7)
 
+def display_result(message, amount, new_balance):
+    color = Fore.GREEN if amount > 0 else Fore.RED if amount < 0 else Fore.YELLOW
+    print(f"\n{Back.BLACK}    {color}{message}{Style.RESET_ALL}{Back.BLACK}")
+    print(f"{Back.BLACK}    New Balance: ${new_balance}{Style.RESET_ALL}{Back.BLACK}")
+    input(f"{Back.BLACK}    Press Enter to continue...{Style.RESET_ALL}{Back.BLACK}")
+
 def display_help():
     help_text = f"""{Back.BLACK}
 {Back.BLACK}    {Fore.CYAN}BLACKJACK RULES & CONTROLS{Style.RESET_ALL}{Back.BLACK}
@@ -576,12 +588,6 @@ def display_help():
     clear_screen()
     print(help_text)
     input()  # Wait for user input before continuing
-
-def display_result(message, amount, new_balance):
-    color = Fore.GREEN if amount > 0 else Fore.RED if amount < 0 else Fore.YELLOW
-    print(f"\n{Back.BLACK}    {color}{message}{Style.RESET_ALL}{Back.BLACK}")
-    print(f"{Back.BLACK}    New Balance: ${new_balance}{Style.RESET_ALL}{Back.BLACK}")
-    input(f"{Back.BLACK}    Press Enter to continue...{Style.RESET_ALL}{Back.BLACK}")
 
 def main():
     global deck, stats, balance, achievements, args
