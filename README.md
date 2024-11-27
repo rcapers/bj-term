@@ -16,6 +16,12 @@ A stylish command-line implementation of Blackjack with a modern dark theme inte
 - 🧠 Strategic gameplay assistance
 - 📈 Card counting and streak tracking
 
+## Play Online
+
+▶️ [Play on Replit](https://replit.com/@rcapers/bj-term)
+
+You can try the game directly in your browser without installing anything!
+
 ## Achievement System
 
 Unlock special achievements as you play:
@@ -34,21 +40,18 @@ Unlock special achievements as you play:
 
 ## Installation
 
-1. Clone or download the repository:
+To run locally:
+
 ```bash
+# Clone the repository
 git clone https://github.com/rcapers/bj-term.git
 cd bj-term
-```
 
-2. Set up a virtual environment (recommended):
-```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows use: venv\Scripts\activate
-```
-
-3. Install required packages:
-```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Run the game
+python bj-term.py
 ```
 
 ## Usage
