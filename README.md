@@ -1,7 +1,7 @@
 # Terminal Blackjack
 A stylish command-line implementation of Blackjack with a modern dark theme interface, written in Python 3.
 
-<img width="554" alt="2024-11-18_15-52-52" src="https://github.com/user-attachments/assets/147fbc0e-0fab-45e5-83fc-dd4b28ea086a">
+![2024-11-27_11-26-57 (1)](https://github.com/user-attachments/assets/7d6a2a9d-6e1c-43de-a9f7-b06325d9bae8)
 
 ## Features
 
